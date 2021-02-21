@@ -32,7 +32,7 @@ if __name__ == "__main__":
     token = getToken()
     #intialize DB
     asyncio.run(intializeDB(token))
-    device = getDevice('test')
+    device = getDevice('Wemo')
     print(device.device_id)
     asyncio.run(toggle(device,token))
     asyncio.run(update(device,token))
