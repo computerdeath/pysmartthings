@@ -20,12 +20,30 @@ class LocalControl:
                 else:
                     db.insert({'device_id': device.device_id, 'name': device.name, 'label': device.label, 'capabilities': device.capabilities})
 
+    @staticmethod
     def getDevice(deviceName):
         deviceHold = Query()
         result = db.search(deviceHold.name == deviceName)
         deviceHold = LocalControl()
         device = deviceHold.Device(result)
         return device
+
+    async def updateDevice(deviceObject,token,session):
+        #update device status in DB
+        api = SmartThings(session, token)
+        deviceId = deviceObject.device_id
+        devices = await api.devices()
+        deviceHold = Query()
+        for device in devices:
+            if device.device_id == deviceObject.device_id:
+                if 'switch' in device.capabilities:
+                    await device.status.refresh()
+                    state = device.status.values['switch']
+                    db.update({'state': state}, deviceHold.device_id == deviceId)
+        localControl = LocalControl()
+        nameN = deviceObject.name
+        deviceOut = localControl.getDevice(nameN)
+        return deviceOut
 
     async def toggleDevice(deviceObject, token, session):
         api = SmartThings(session, token)
